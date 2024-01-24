@@ -5,7 +5,7 @@ class Serialization
 public:
     enum : std::uint32_t
     {
-        kModID = 'ZZZZ',
+        kModID = 'TRNR',
         kVersion = 1,
         kCollection = 'COLL'
     };
