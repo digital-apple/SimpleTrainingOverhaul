@@ -7,6 +7,11 @@ auto System::GetSingleton() -> System*
     return std::addressof(singleton);
 }
 
+bool System::ContainsTopic(RE::FormID a_id)
+{
+    return std::find_if(topics.begin(), topics.end(), [a_id](System::Topic topic) { return topic.quest == a_id; }) != topics.end();
+}
+
 void System::ParseTopics()
 {
     const auto data = RE::TESDataHandler::GetSingleton();
@@ -27,9 +32,28 @@ void System::ParseTopics()
     logs::info("System::ParseTopics :: Number of topics: '{}'", topics.size());
 }
 
-bool System::ContainsTopic(RE::FormID a_id)
+void System::PatchTopicInfos(RE::FormID a_id)
 {
-    return std::find_if(topics.begin(), topics.end(), [a_id](System::Topic topic) { return topic.quest == a_id; }) != topics.end();
+    const auto topic = RE::TESForm::LookupByID<RE::TESTopic>(a_id);
+    
+    if (topic) {
+        logs::info("Topic: '0x{:x}' number of topics: '{}'", a_id, topic->numTopicInfos);
+
+        for (std::size_t i = 0; i < topic->numTopicInfos; i++) {
+            auto conditions = topic->topicInfos[i]->objConditions.head;
+
+            while (conditions) {
+                if (conditions->data.functionData.function == RE::FUNCTION_DATA::FunctionID::kGetBaseActorValue) {
+                    VoidCaster<RE::ActorValue> value = conditions->data.functionData.params[0];
+                    conditions->data.functionData.function = RE::FUNCTION_DATA::FunctionID::kGetGlobalValue;
+                    conditions->data.functionData.params[0] = Serialization::GetSingleton()->GetGlobalValue(value);
+
+                    logs::info("Patched topic info: '0x{:x}' from topic: '0x{:x}' from mod: '{}'", topic->topicInfos[i]->GetFormID(), topic->GetFormID(), topic->GetFile()->GetFilename());
+                }
+                conditions = conditions->next;
+            }
+        }
+    }
 }
 
 void System::PatchTopics()
@@ -44,30 +68,6 @@ void System::PatchTopics(RE::FormID a_id)
     for (const auto& topic : topics) {
         if (topic.quest == a_id) {
             System::PatchTopicInfos(topic.topic);
-        }
-    }
-}
-
-void System::PatchTopicInfos(RE::FormID a_id)
-{
-    const auto topic = RE::TESForm::LookupByID<RE::TESTopic>(a_id);
-    
-    logs::info("Current Topic: '0x{:x}'", a_id);
-
-    if (topic) {
-        logs::info("Topic: '0x{:x}' number of topics: '{}'", a_id, topic->numTopicInfos);
-        for (std::size_t i = 0; i < topic->numTopicInfos; i++) {
-            auto conditions = topic->topicInfos[i]->objConditions.head;
-
-            while (conditions) {
-                if (conditions->data.functionData.function == RE::FUNCTION_DATA::FunctionID::kGetBaseActorValue) {
-                    VoidCaster<RE::ActorValue> value = conditions->data.functionData.params[0];
-                    conditions->data.functionData.function = RE::FUNCTION_DATA::FunctionID::kGetGlobalValue;
-                    conditions->data.functionData.params[0] = Serialization::GetSingleton()->GetGlobalValue(value);
-                    logs::info("Patched topic info: '0x{:x}' from topic: '0x{:x}' from mod: '{}'", topic->topicInfos[i]->GetFormID(), topic->GetFormID(), topic->GetFile()->GetFilename());
-                }
-                conditions = conditions->next;
-            }
         }
     }
 }

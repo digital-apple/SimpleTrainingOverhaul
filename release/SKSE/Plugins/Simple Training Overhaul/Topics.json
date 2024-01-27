@@ -1,0 +1,25 @@
+{
+	"Topics" :
+	[
+		{
+			"Quest" : { "FormID" : "0xE3A7C", "ModName" : "Skyrim.esm" },
+			"Topic" : { "FormID" : "0xE3A35", "ModName" : "Skyrim.esm" }
+		},
+		{
+			"Quest" : { "FormID" : "0x4E0D", "ModName" : "Dawnguard.esm" },
+			"Topic" : { "FormID" : "0x10A81", "ModName" : "Dawnguard.esm" }
+		},
+		{
+			"Quest" : { "FormID" : "0x4E0C", "ModName" : "Dawnguard.esm" },
+			"Topic" : { "FormID" : "0x11198", "ModName" : "Dawnguard.esm" }
+		},
+		{
+			"Quest" : { "FormID" : "0x17E85", "ModName" : "Dragonborn.esm" },
+			"Topic" : { "FormID" : "0x20677", "ModName" : "Dragonborn.esm" }
+		},
+		{
+			"Quest" : { "FormID" : "0x17E85", "ModName" : "Dragonborn.esm" },
+			"Topic" : { "FormID" : "0x2C432", "ModName" : "Dragonborn.esm" }
+		}
+	]
+}

@@ -6,7 +6,7 @@ public:
     enum : std::uint32_t
     {
         kModID = 'STOL',
-        kVersion = 2,
+        kVersion = 1,
         kCollection = 'COLL'
     };
 
@@ -17,11 +17,10 @@ public:
     static void OnRevert(SKSE::SerializationInterface*);
 
     void CreateGlobalVariables();
-    auto GetGlobalValue(RE::ActorValue a_value) -> RE::TESGlobal*;
-    void SetGlobalValue(RE::ActorValue a_value, std::uint32_t a_amount);
-
-    void SetCurrentActorValue(RE::ActorValue a_value);
     auto GetCurrentActorValue() -> RE::ActorValue;
+    auto GetGlobalValue(RE::ActorValue a_value) -> RE::TESGlobal*;
+    void SetCurrentActorValue(RE::ActorValue a_value);
+    void SetGlobalValue(RE::ActorValue a_value, std::uint32_t a_amount);
 private:
     Serialization() = default;
     Serialization(const Serialization&) = delete;

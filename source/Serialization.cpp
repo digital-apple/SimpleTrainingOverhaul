@@ -74,16 +74,6 @@ void Serialization::OnRevert(SKSE::SerializationInterface*)
     }
 }
 
-auto Serialization::GetGlobalValue(RE::ActorValue a_value) -> RE::TESGlobal*
-{
-    return collection[a_value];
-}
-
-void Serialization::SetGlobalValue(RE::ActorValue a_value, std::uint32_t a_amount)
-{
-    collection[a_value]->value += static_cast<float>(a_amount);
-}
-
 void Serialization::CreateGlobalVariables()
 {
     const auto factory = RE::IFormFactory::GetConcreteFormFactoryByType<RE::TESGlobal>();
@@ -116,12 +106,22 @@ void Serialization::CreateGlobalVariables()
     logs::info("Serialization::CreateGlobalVariables :: Collection size: '{}'", collection.size());
 }
 
+auto Serialization::GetCurrentActorValue() -> RE::ActorValue
+{
+    return current;
+}
+
+auto Serialization::GetGlobalValue(RE::ActorValue a_value) -> RE::TESGlobal*
+{
+    return collection[a_value];
+}
+
 void Serialization::SetCurrentActorValue(RE::ActorValue a_value)
 {
     current = a_value;
 }
 
-auto Serialization::GetCurrentActorValue() -> RE::ActorValue
+void Serialization::SetGlobalValue(RE::ActorValue a_value, std::uint32_t a_amount)
 {
-    return current;
+    collection[a_value]->value += static_cast<float>(a_amount);
 }

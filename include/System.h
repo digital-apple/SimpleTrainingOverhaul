@@ -31,11 +31,11 @@ public:
 
     static auto GetSingleton() -> System*;
 
-    void ParseTopics();
     bool ContainsTopic(RE::FormID a_id);
+    void ParseTopics();
+    void PatchTopicInfos(RE::FormID a_id);
     void PatchTopics();
     void PatchTopics(RE::FormID a_id);
-    void PatchTopicInfos(RE::FormID a_id);
 private:
     System() = default;
     System(const System&) = delete;
