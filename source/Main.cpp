@@ -1,6 +1,7 @@
 #include "Events.h"
 #include "Hooks.h"
 #include "Serialization.h"
+#include "System.h"
 
 void InitLogging()
 {
@@ -29,13 +30,18 @@ void InitMessaging()
     logs::trace("Initializing messaging listener.");
     const auto interface = SKSE::GetMessagingInterface();
     if (!interface->RegisterListener([](SKSE::MessagingInterface::Message* a_message) {
-        if (a_message->type == SKSE::MessagingInterface::kDataLoaded) {
+        switch(a_message->type) {
+        case SKSE::MessagingInterface::kDataLoaded:
+            Serialization::GetSingleton()->CreateGlobalVariables();
             Addresses::Hook();
             Events::GetSingleton()->Register();
+            System::GetSingleton()->ParseTopics();
+            break;
+        case SKSE::MessagingInterface::kPostLoadGame:
+            System::GetSingleton()->PatchTopics();
+            break;
         }
-        })) {
-        stl::report_and_fail("Failed to initialize message listener.");
-    }
+    })) { stl::report_and_fail("Failed to initialize message listener."); }
 }
 
 void InitSerialization()

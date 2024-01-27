@@ -5,8 +5,8 @@ class Serialization
 public:
     enum : std::uint32_t
     {
-        kModID = 'TRNR',
-        kVersion = 1,
+        kModID = 'STOL',
+        kVersion = 2,
         kCollection = 'COLL'
     };
 
@@ -16,8 +16,12 @@ public:
     static void OnGameSaved(SKSE::SerializationInterface*a_interface);
     static void OnRevert(SKSE::SerializationInterface*);
 
-    auto GetActorValue(RE::ActorValue a_value) -> float;
-    void SetActorValue(RE::ActorValue a_value, std::uint32_t a_amount);
+    void CreateGlobalVariables();
+    auto GetGlobalValue(RE::ActorValue a_value) -> RE::TESGlobal*;
+    void SetGlobalValue(RE::ActorValue a_value, std::uint32_t a_amount);
+
+    void SetCurrentActorValue(RE::ActorValue a_value);
+    auto GetCurrentActorValue() -> RE::ActorValue;
 private:
     Serialization() = default;
     Serialization(const Serialization&) = delete;
@@ -29,5 +33,6 @@ private:
     Serialization& operator=(Serialization&&) = delete;
 
     mutable std::mutex lock;
-    std::unordered_map<RE::ActorValue, float> collection;
+    std::unordered_map<RE::ActorValue, RE::TESGlobal*> collection;
+    RE::ActorValue current;
 };

@@ -6,11 +6,15 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/msvc_sink.h>
 
+#include <jsoncons/json.hpp>
+
 #include <xbyak/xbyak.h>
 
 namespace WinAPI = SKSE::WinAPI;
 namespace logs = SKSE::log;
 using namespace std::literals;
+
+using namespace jsoncons;
 
 namespace stl
 {

@@ -1,4 +1,5 @@
 #include "Events.h"
+#include "System.h"
 
 auto Events::GetSingleton() -> Events*
 {
@@ -11,6 +12,11 @@ void Events::Register()
     if (const auto UI = RE::UI::GetSingleton()) {
         UI->AddEventSink<RE::MenuOpenCloseEvent>(GetSingleton());
         logs::info("Events :: Registered for MenuOpenCloseEvent.");
+    }
+
+    if (const auto events = RE::ScriptEventSourceHolder::GetSingleton()) {
+        events->GetEventSource<RE::TESQuestStartStopEvent>()->AddEventSink(GetSingleton());
+        logs::info("Events :: Registered for TESQuestStartStopEvent.");
     }
 }
 
@@ -34,6 +40,21 @@ auto Events::ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSou
             }
         }
     }
+
+    return RE::BSEventNotifyControl::kContinue;
+}
+
+auto Events::ProcessEvent(const RE::TESQuestStartStopEvent* a_event, RE::BSTEventSource<RE::TESQuestStartStopEvent>*) -> RE::BSEventNotifyControl
+{
+    if (!a_event) {
+        return RE::BSEventNotifyControl::kContinue;
+    }
+
+    if (!System::GetSingleton()->ContainsTopic(a_event->formID)) {
+        return RE::BSEventNotifyControl::kContinue;
+    }
+
+    System::GetSingleton()->PatchTopics(a_event->formID);
 
     return RE::BSEventNotifyControl::kContinue;
 }

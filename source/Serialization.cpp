@@ -25,14 +25,13 @@ void Serialization::OnGameLoaded(SKSE::SerializationInterface* a_interface)
 
             for (std::size_t i = 0; i < count; i++) {
                 RE::ActorValue value;
-                float amount;
+                float global;
 
                 a_interface->ReadRecordData(&value, sizeof(value));
-                a_interface->ReadRecordData(&amount, sizeof(amount));
+                a_interface->ReadRecordData(&global, sizeof(global));
 
-                Serialization::GetSingleton()->collection[value] = amount;
+                Serialization::GetSingleton()->collection[value]->value = global;
             }
-
             break; 
         }
     }
@@ -54,13 +53,13 @@ void Serialization::OnGameSaved(SKSE::SerializationInterface* a_interface)
 
     for (const auto& element : Serialization::GetSingleton()->collection) {
         const auto value = element.first;
-        const auto amount = element.second;
+        const auto global = element.second->value;
 
         if (!a_interface->WriteRecordData(&value, sizeof(value))) {
             return;
         }
 
-        if (!a_interface->WriteRecordData(&amount, sizeof(amount))) {
+        if (!a_interface->WriteRecordData(&global, sizeof(global))) {
             return;
         }
     }
@@ -69,15 +68,60 @@ void Serialization::OnGameSaved(SKSE::SerializationInterface* a_interface)
 void Serialization::OnRevert(SKSE::SerializationInterface*)
 {
     std::unique_lock lock(Serialization::GetSingleton()->lock);
-    Serialization::GetSingleton()->collection.clear();
+
+    for (const auto& value : Serialization::GetSingleton()->collection) {
+        value.second->value = 0.0F;
+    }
 }
 
-auto Serialization::GetActorValue(RE::ActorValue a_value) -> float
+auto Serialization::GetGlobalValue(RE::ActorValue a_value) -> RE::TESGlobal*
 {
     return collection[a_value];
 }
 
-void Serialization::SetActorValue(RE::ActorValue a_value, std::uint32_t a_amount)
+void Serialization::SetGlobalValue(RE::ActorValue a_value, std::uint32_t a_amount)
 {
-    collection[a_value] += static_cast<float>(a_amount);
+    collection[a_value]->value += static_cast<float>(a_amount);
+}
+
+void Serialization::CreateGlobalVariables()
+{
+    const auto factory = RE::IFormFactory::GetConcreteFormFactoryByType<RE::TESGlobal>();
+
+    if (factory && collection.empty()) {
+        collection.try_emplace(RE::ActorValue::kAlchemy, factory->Create());
+        collection.try_emplace(RE::ActorValue::kAlteration, factory->Create());
+        collection.try_emplace(RE::ActorValue::kArchery, factory->Create());
+        collection.try_emplace(RE::ActorValue::kBlock, factory->Create());
+        collection.try_emplace(RE::ActorValue::kConjuration, factory->Create());
+        collection.try_emplace(RE::ActorValue::kDestruction, factory->Create());
+        collection.try_emplace(RE::ActorValue::kEnchanting, factory->Create());
+        collection.try_emplace(RE::ActorValue::kHeavyArmor, factory->Create());
+        collection.try_emplace(RE::ActorValue::kIllusion, factory->Create());
+        collection.try_emplace(RE::ActorValue::kLightArmor, factory->Create());
+        collection.try_emplace(RE::ActorValue::kLockpicking, factory->Create());
+        collection.try_emplace(RE::ActorValue::kOneHanded, factory->Create());
+        collection.try_emplace(RE::ActorValue::kPickpocket, factory->Create());
+        collection.try_emplace(RE::ActorValue::kRestoration, factory->Create());
+        collection.try_emplace(RE::ActorValue::kSmithing, factory->Create());
+        collection.try_emplace(RE::ActorValue::kSneak, factory->Create());
+        collection.try_emplace(RE::ActorValue::kSpeech, factory->Create());
+        collection.try_emplace(RE::ActorValue::kTwoHanded, factory->Create());
+    }
+
+    for (const auto& value : collection) {
+        value.second->formFlags |= RE::TESForm::RecordFlags::kTemporary;
+    }
+
+    logs::info("Serialization::CreateGlobalVariables :: Collection size: '{}'", collection.size());
+}
+
+void Serialization::SetCurrentActorValue(RE::ActorValue a_value)
+{
+    current = a_value;
+}
+
+auto Serialization::GetCurrentActorValue() -> RE::ActorValue
+{
+    return current;
 }

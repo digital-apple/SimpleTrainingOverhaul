@@ -3,7 +3,7 @@ set_xmakever("2.7.8")
 
 -- set project
 set_project("Simple Training Overhaul")
-set_version("1.0.0")
+set_version("1.0.1")
 set_license("MIT")
 set_languages("c++23")
 set_optimize("faster")
@@ -26,12 +26,12 @@ add_rules("plugin.compile_commands.autoupdate", {outputdir = ".", lsp = "clangd"
 set_policy("package.requires_lock", true)
 
 -- require packages
-add_requires("commonlibsse-ng", { configs = { skyrim_vr = false, skse_xbyak = true } })
+add_requires("jsoncons", "commonlibsse-ng", { configs = { skyrim_vr = false, skse_xbyak = true } })
 
 -- targets
 target("Simple Training Overhaul")
     -- add packages to target
-    add_packages("fmt", "spdlog 1.12.0", { configs = { fmt_external = true } }, "commonlibsse-ng")
+    add_packages("jsoncons", "fmt", "spdlog 1.12.0", { configs = { fmt_external = true } }, "commonlibsse-ng")
 
     -- add commonlibsse-ng plugin
     add_rules("@commonlibsse-ng/plugin", {
